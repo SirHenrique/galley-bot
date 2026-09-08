@@ -95,7 +95,7 @@ client.on('interactionCreate', async interaction => {
 
 const AUTO_ROLE_ID = '1546708141507481702';
 const WELCOME_CHANNEL_ID = '1546700449627906069';
-const WELCOME_GIF = 'https://media1.tenor.com/m/wqbagCCVA74AAAAd/document-signing.gif';
+const WELCOME_GIF = 'https://media.tenor.com/wqbagCCVA74AAAAd/document-signing.gif';
 
 client.on('guildMemberAdd', async member => {
     try {
