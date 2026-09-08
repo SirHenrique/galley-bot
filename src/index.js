@@ -17,6 +17,7 @@ for (const file of fs.readdirSync(commandsPath).filter(f => f.endsWith('.js'))) 
     }
 }
 
+const { EmbedBuilder } = require('discord.js');
 const { handle: handleChecklistButton, handleLoreModal } = require('./buttons/checklistButtons');
 const { handleRemoveButton } = require('./commands/personagem');
 
@@ -94,7 +95,7 @@ client.on('interactionCreate', async interaction => {
 
 const AUTO_ROLE_ID = '1546708141507481702';
 const WELCOME_CHANNEL_ID = '1546700449627906069';
-const WELCOME_GIF = 'https://images-ext-1.discordapp.net/external/tEUtHwSftwbx2UH_OUH51Q-vk4XARyNste5jGe8oUBg/https/static.klipy.com/ii/a15b48460c436e1e92c85ffc680932cc/be/94/yO01ZJ5ZRlYgIaQq6nNU.mp4';
+const WELCOME_GIF = 'https://tenor.com/pt-BR/view/document-signing-sign-shrek-shrek-meme-gif-14026138333329294270';
 
 client.on('guildMemberAdd', async member => {
     try {
@@ -112,9 +113,24 @@ client.on('guildMemberAdd', async member => {
     try {
         const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
         if (channel) {
-            await channel.send({
-                content: `👋 Bem-vindo(a) ao servidor, <@${member.id}>!\n\n${WELCOME_GIF}\n\n> 🧅 **Você só pode ficar se assinar!**\nLeia as regras e assine para liberar o acesso ao servidor.`,
-            });
+            await channel.send({ content: WELCOME_GIF });
+
+            const embed = new EmbedBuilder()
+                .setColor(0x2B7A0B)
+                .setDescription(
+                    '━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+                    '🧅 **BEM-VINDO(A) AO GALLEYRP**\n' +
+                    '━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+                    `👤 Olá, <@${member.id}>! Você entrou no servidor.\n\n` +
+                    '📜 Você só pode ficar se **assinar**!\n' +
+                    '┃ Leia as regras e assine para liberar\n' +
+                    '┃ o acesso completo ao servidor.\n\n' +
+                    '━━━━━━━━━━━━━━━━━━━━━━━━━'
+                )
+                .setFooter({ text: 'GalleyRP • Bem-vindo(a)!' })
+                .setTimestamp();
+
+            await channel.send({ embeds: [embed] });
         }
     } catch (error) {
         console.error(`[Welcome] Erro ao enviar mensagem para ${member.user.tag}:`, error);
