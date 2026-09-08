@@ -1,0 +1,95 @@
+require('dotenv').config();
+const { Client, GatewayIntentBits, Collection, MessageFlags } = require('discord.js');
+const path = require('path');
+const fs = require('fs');
+
+const client = new Client({
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
+});
+
+client.commands = new Collection();
+
+const commandsPath = path.join(__dirname, 'commands');
+for (const file of fs.readdirSync(commandsPath).filter(f => f.endsWith('.js'))) {
+    const command = require(path.join(commandsPath, file));
+    if (command.data && command.execute) {
+        client.commands.set(command.data.name, command);
+    }
+}
+
+const { handle: handleChecklistButton, handleLoreModal } = require('./buttons/checklistButtons');
+const { handleRemoveButton } = require('./commands/personagem');
+
+client.once('clientReady', () => {
+    console.log(`✅ Bot ${client.user.tag} online!`);
+    console.log(`📋 Comandos carregados: ${[...client.commands.keys()].join(', ')}`);
+});
+
+client.on('interactionCreate', async interaction => {
+    if (interaction.isChatInputCommand()) {
+        const command = client.commands.get(interaction.commandName);
+        if (!command) return;
+
+        try {
+            await command.execute(interaction);
+        } catch (error) {
+            console.error(`[Comando] Erro em /${interaction.commandName}:`, error);
+            const msg = { content: '❌ Ocorreu um erro ao executar o comando.', flags: MessageFlags.Ephemeral };
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp(msg).catch(() => {});
+            } else {
+                await interaction.reply(msg).catch(() => {});
+            }
+        }
+        return;
+    }
+
+    if (interaction.isAutocomplete()) {
+        const command = client.commands.get(interaction.commandName);
+        if (command?.autocomplete) {
+            try {
+                await command.autocomplete(interaction);
+            } catch (error) {
+                console.error(`[Autocomplete] Erro em /${interaction.commandName}:`, error);
+            }
+        }
+        return;
+    }
+
+    if (interaction.isModalSubmit()) {
+        try {
+            if (interaction.customId.startsWith('modal_lore_')) {
+                await handleLoreModal(interaction);
+            }
+        } catch (error) {
+            console.error('[Modal] Erro:', error);
+            const msg = { content: '❌ Ocorreu um erro ao processar o modal.', flags: MessageFlags.Ephemeral };
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.reply(msg).catch(() => {});
+            }
+        }
+        return;
+    }
+
+    if (interaction.isButton()) {
+        try {
+            if (interaction.customId.startsWith('checklist_')) {
+                await handleChecklistButton(interaction);
+            } else if (
+                interaction.customId.startsWith('confirm_remove_') ||
+                interaction.customId.startsWith('cancel_remove_')
+            ) {
+                await handleRemoveButton(interaction);
+            }
+        } catch (error) {
+            console.error('[Botão] Erro:', error);
+            const msg = { content: '❌ Ocorreu um erro ao processar o botão.', flags: MessageFlags.Ephemeral };
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.reply(msg).catch(() => {});
+            }
+        }
+        return;
+    }
+});
+
+client.login(process.env.BOT_TOKEN);
