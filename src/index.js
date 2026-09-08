@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers]
 });
 
 client.commands = new Collection();
@@ -89,6 +89,22 @@ client.on('interactionCreate', async interaction => {
             }
         }
         return;
+    }
+});
+
+const AUTO_ROLE_ID = '1546708141507481702';
+
+client.on('guildMemberAdd', async member => {
+    try {
+        const role = member.guild.roles.cache.get(AUTO_ROLE_ID);
+        if (role) {
+            await member.roles.add(role);
+            console.log(`✅ Cargo atribuído para ${member.user.tag}`);
+        } else {
+            console.warn(`⚠️ Cargo ${AUTO_ROLE_ID} não encontrado no servidor`);
+        }
+    } catch (error) {
+        console.error(`[AutoRole] Erro ao atribuir cargo para ${member.user.tag}:`, error);
     }
 });
 
