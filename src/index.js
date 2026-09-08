@@ -93,6 +93,8 @@ client.on('interactionCreate', async interaction => {
 });
 
 const AUTO_ROLE_ID = '1546708141507481702';
+const WELCOME_CHANNEL_ID = '1546700449627906069';
+const WELCOME_GIF = 'https://images-ext-1.discordapp.net/external/tEUtHwSftwbx2UH_OUH51Q-vk4XARyNste5jGe8oUBg/https/static.klipy.com/ii/a15b48460c436e1e92c85ffc680932cc/be/94/yO01ZJ5ZRlYgIaQq6nNU.mp4';
 
 client.on('guildMemberAdd', async member => {
     try {
@@ -105,6 +107,17 @@ client.on('guildMemberAdd', async member => {
         }
     } catch (error) {
         console.error(`[AutoRole] Erro ao atribuir cargo para ${member.user.tag}:`, error);
+    }
+
+    try {
+        const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
+        if (channel) {
+            await channel.send({
+                content: `👋 Bem-vindo(a) ao servidor, <@${member.id}>!\n\n${WELCOME_GIF}\n\n> 🧅 **Você só pode ficar se assinar!**\nLeia as regras e assine para liberar o acesso ao servidor.`,
+            });
+        }
+    } catch (error) {
+        console.error(`[Welcome] Erro ao enviar mensagem para ${member.user.tag}:`, error);
     }
 });
 
