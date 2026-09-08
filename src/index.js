@@ -95,7 +95,7 @@ client.on('interactionCreate', async interaction => {
 
 const AUTO_ROLE_ID = '1546708141507481702';
 const WELCOME_CHANNEL_ID = '1546700449627906069';
-const WELCOME_GIF = 'https://tenor.com/pt-BR/view/document-signing-sign-shrek-shrek-meme-gif-14026138333329294270';
+const WELCOME_GIF = 'https://media1.tenor.com/m/wqbagCCVA74AAAAd/document-signing.gif';
 
 client.on('guildMemberAdd', async member => {
     try {
@@ -113,10 +113,9 @@ client.on('guildMemberAdd', async member => {
     try {
         const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
         if (channel) {
-            await channel.send({ content: WELCOME_GIF });
-
             const embed = new EmbedBuilder()
                 .setColor(0x2B7A0B)
+                .setImage(WELCOME_GIF)
                 .setDescription(
                     '━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
                     '🧅 **BEM-VINDO(A) AO GALLEYRP**\n' +
