@@ -136,4 +136,13 @@ client.on('guildMemberAdd', async member => {
     }
 });
 
+client.on('messageCreate', async message => {
+    if (message.author.bot) return;
+    if (message.mentions.has(client.user)) {
+        await message.channel.send(
+            `Não marque staffs de cargo alto! Preciso me concentrar para responder meus webamigos a próxima é ban! <@${message.author.id}>`
+        ).catch(err => console.error('[Mention] Erro ao responder menção:', err));
+    }
+});
+
 client.login(process.env.BOT_TOKEN);
