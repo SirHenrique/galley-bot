@@ -136,12 +136,31 @@ client.on('guildMemberAdd', async member => {
     }
 });
 
+const MENTION_GIF = 'https://media.tenor.com/ZLJALFcM_GkAAAAM/n-entrosa-favelado.gif';
+const mentionCount = new Map();
+
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
-    if (message.mentions.has(client.user)) {
-        await message.channel.send(
-            `Não marque staffs de cargo alto! Preciso me concentrar para responder meus webamigos a próxima é ban! <@${message.author.id}>`
-        ).catch(err => console.error('[Mention] Erro ao responder menção:', err));
+    if (!message.mentions.has(client.user)) return;
+
+    const userId = message.author.id;
+    const count = (mentionCount.get(userId) || 0) + 1;
+    mentionCount.set(userId, count);
+
+    try {
+        if (count === 1) {
+            await message.channel.send(
+                `Não marque staffs de cargo alto! Preciso me concentrar para responder meus webamigos a próxima é ban! <@${userId}>`
+            );
+        } else {
+            const embed = new EmbedBuilder()
+                .setColor(0xFF0000)
+                .setImage(MENTION_GIF);
+            await message.channel.send({ embeds: [embed] });
+            mentionCount.set(userId, 0);
+        }
+    } catch (err) {
+        console.error('[Mention] Erro ao responder menção:', err);
     }
 });
 
