@@ -144,6 +144,12 @@ client.on('messageCreate', async message => {
     if (!message.mentions.has(client.user)) return;
 
     const userId = message.author.id;
+
+    if (userId === '403525211665727489') {
+        await message.channel.send(`é isso mesmo senhor <@${userId}>`).catch(err => console.error('[Mention] Erro:', err));
+        return;
+    }
+
     const count = (mentionCount.get(userId) || 0) + 1;
     mentionCount.set(userId, count);
 
