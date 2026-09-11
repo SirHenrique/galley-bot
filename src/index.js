@@ -187,6 +187,11 @@ client.on('messageCreate', async message => {
         return;
     }
 
+    if (userId === '470414658650767360') {
+        await message.channel.send(`Chama o <@740203399840268360> para jogar modpack AGORA!`).catch(err => console.error('[Mention] Erro:', err));
+        return;
+    }
+
     const count = (mentionCount.get(userId) || 0) + 1;
     mentionCount.set(userId, count);
 
