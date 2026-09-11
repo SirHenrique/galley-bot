@@ -94,6 +94,30 @@ module.exports = {
         );
     },
 
+    async getAniversario(userId) {
+        return query(
+            supabase.from('aniversarios').select('*').eq('user_id', userId).maybeSingle()
+        );
+    },
+
+    async setAniversario(userId, dia, mes) {
+        return query(
+            supabase.from('aniversarios').upsert({ user_id: userId, dia, mes })
+        );
+    },
+
+    async getAllAniversarios() {
+        return query(
+            supabase.from('aniversarios').select('*').order('mes', { ascending: true }).order('dia', { ascending: true })
+        );
+    },
+
+    async getAniversariosByDate(dia, mes) {
+        return query(
+            supabase.from('aniversarios').select('*').eq('dia', dia).eq('mes', mes)
+        );
+    },
+
     async getConfig(key) {
         const data = await query(
             supabase.from('config').select('value').eq('key', key).maybeSingle()

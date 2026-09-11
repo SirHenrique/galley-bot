@@ -20,10 +20,37 @@ for (const file of fs.readdirSync(commandsPath).filter(f => f.endsWith('.js'))) 
 const { EmbedBuilder } = require('discord.js');
 const { handle: handleChecklistButton, handleLoreModal } = require('./buttons/checklistButtons');
 const { handleRemoveButton } = require('./commands/personagem');
+const { handleBirthdayButton, handleBirthdayModal } = require('./buttons/birthdayButtons');
+const { sendBirthdayDM } = require('./utils/birthdayUtils');
+const db = require('./database');
 
 client.once('clientReady', () => {
     console.log(`✅ Bot ${client.user.tag} online!`);
     console.log(`📋 Comandos carregados: ${[...client.commands.keys()].join(', ')}`);
+
+    let lastBirthdayDate = null;
+    setInterval(async () => {
+        const now = new Date();
+        const today = `${now.getDate()}-${now.getMonth() + 1}`;
+        if (now.getHours() !== 0 || lastBirthdayDate === today) return;
+        lastBirthdayDate = today;
+
+        try {
+            const channelId = await db.getConfig('birthday_channel_id');
+            if (!channelId) return;
+            const channel = client.channels.cache.get(channelId);
+            if (!channel) return;
+
+            const aniversariantes = await db.getAniversariosByDate(now.getDate(), now.getMonth() + 1);
+            for (const a of aniversariantes) {
+                await channel.send(
+                    `🎂🎉 Hoje é o aniversário de <@${a.user_id}>! Feliz aniversário! 🥳🎊`
+                );
+            }
+        } catch (err) {
+            console.error('[Birthday] Erro na verificação diária:', err);
+        }
+    }, 60 * 60 * 1000);
 });
 
 client.on('interactionCreate', async interaction => {
@@ -61,6 +88,8 @@ client.on('interactionCreate', async interaction => {
         try {
             if (interaction.customId.startsWith('modal_lore_')) {
                 await handleLoreModal(interaction);
+            } else if (interaction.customId === 'modal_birthday_set') {
+                await handleBirthdayModal(interaction);
             }
         } catch (error) {
             console.error('[Modal] Erro:', error);
@@ -81,6 +110,8 @@ client.on('interactionCreate', async interaction => {
                 interaction.customId.startsWith('cancel_remove_')
             ) {
                 await handleRemoveButton(interaction);
+            } else if (interaction.customId === 'birthday_set_btn') {
+                await handleBirthdayButton(interaction);
             }
         } catch (error) {
             console.error('[Botão] Erro:', error);
@@ -108,6 +139,12 @@ client.on('guildMemberAdd', async member => {
         }
     } catch (error) {
         console.error(`[AutoRole] Erro ao atribuir cargo para ${member.user.tag}:`, error);
+    }
+
+    try {
+        await sendBirthdayDM(member.user);
+    } catch {
+        // DM fechado, ignorar
     }
 
     try {
